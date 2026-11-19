@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nacricks Hub — Trabajos, Tareas y Proyectos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            merc: {
+              950: '#070A0C', // Negro carbón profundo
+              900: '#0D1216', // Asfalto oscuro
+              850: '#131A20', // Panel fibra de carbono
+              800: '#1B242C', // Borde metálico
+              petronas: '#00D2BE', // Turquesa Petronas oficial
+              petronasDark: '#00A19C',
+              silver: '#C6C9CE', // Plata Flecha
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(19, 26, 32, 0.78);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(198, 201, 206, 0.12);
+    }
+    html:not(.dark) .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    .petronas-glow {
+      box-shadow: 0 0 25px rgba(0, 210, 190, 0.18);
+    }
+    /* Barra de desplazamiento personalizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070A0C;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1B242C;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00D2BE;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-merc-950 dark:text-slate-100 font-sans antialiased transition-colors duration-300 selection:bg-merc-petronas selection:text-merc-950">
+
+  <!-- Barra de navegación superior -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-white/85 dark:bg-merc-950/85 border-b border-slate-200 dark:border-merc-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3">
+        <!-- Marca estilo Mercedes / Nacricks -->
+        <a href="#inicio" class="flex items-center gap-2.5 font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white shrink-0">
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-merc-petronas via-teal-500 to-slate-400 flex items-center justify-center text-merc-950 shadow-lg shadow-merc-petronas/20">
+            <!-- Estrella de 3 puntas minimalista -->
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="9.5"></circle>
+              <path d="M12 2.5V12M12 12L4.2 17.5M12 12L19.8 17.5" stroke-linecap="round"></path>
+            </svg>
+          </span>
+          <span>Nacricks <span class="text-merc-petronas">Workspace</span></span>
+        </a>
+
+        <!-- Navegación -->
+        <nav class="hidden md:flex items-center gap-2 text-sm font-medium">
+          <a href="#trabajos" class="px-3 py-2 rounded-xl hover:bg-merc-petronas/10 text-slate-700 dark:text-merc-silver hover:text-merc-petronas transition">
+            Trabajos Prácticos
+          </a>
+          <a href="#tareas" class="px-3 py-2 rounded-xl hover:bg-merc-petronas/10 text-slate-700 dark:text-merc-silver hover:text-merc-petronas transition">
+            Tareas Pendientes
+          </a>
+          <a href="#proyectos" class="px-3 py-2 rounded-xl hover:bg-merc-petronas/10 text-slate-700 dark:text-merc-silver hover:text-merc-petronas transition">
+            Proyectos & Código
+          </a>
+        </nav>
+
+        <!-- Acciones: Botón Gemini + Tema -->
+        <div class="flex items-center gap-2">
+          <button id="openGeminiBtn" type="button" class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-merc-petronas hover:bg-teal-300 text-merc-950 transition shadow-lg shadow-merc-petronas/25 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C12.3 7.4 16.6 11.7 22 12C16.6 12.3 12.3 16.6 12 22C11.7 16.6 7.4 12.3 2 12C7.4 11.7 11.7 7.4 12 2Z"/>
+            </svg>
+            <span>Conectar Gemini</span>
+            <span id="geminiStatusDot" class="w-2 h-2 rounded-full bg-merc-950/40"></span>
+          </button>
+
+          <button id="themeToggle" type="button" aria-label="Alternar tema" class="p-2.5 rounded-xl border border-slate-200 dark:border-merc-800 bg-slate-100 dark:bg-merc-900 text-slate-700 dark:text-merc-silver hover:border-merc-petronas/50 transition shrink-0">
+            <svg class="w-5 h-5 hidden dark:block text-merc-petronas" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="5"></circle>
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+            </svg>
+            <svg class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Principal estilo Silver Arrows -->
+  <section id="inicio" class="relative overflow-hidden py-14 sm:py-20 px-4 sm:px-6 lg:px-8 border-b border-slate-200 dark:border-merc-800">
+    <!-- Resplandores Turquesa Petronas y Plata -->
+    <div class="pointer-events-none absolute -top-28 left-1/4 w-96 h-96 bg-merc-petronas/15 rounded-full blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-28 right-1/4 w-96 h-96 bg-slate-400/10 rounded-full blur-3xl"></div>
+
+    <div class="relative max-w-5xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-merc-petronas/10 text-teal-700 dark:text-merc-petronas border border-merc-petronas/30 mb-5">
+        <span class="w-2 h-2 rounded-full bg-merc-petronas animate-pulse"></span>
+        Portal Personal • GitHub Pages & Live AI Studio
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-5">
+        Centro de Control de <span class="text-transparent bg-clip-text bg-gradient-to-r from-merc-petronas via-teal-300 to-merc-silver">Trabajos y Tareas</span>
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-600 dark:text-merc-silver/80 max-w-2xl mx-auto leading-relaxed mb-8">
+        Repositorio interactivo para organizar entregas, guías de estudio, tareas diarias y proyectos personales. Usa el asistente de <strong>Gemini en vivo</strong> para crear y actualizar tarjetas al instante.
+      </p>
+
+      <!-- Métricas / Accesos rápidos -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto text-left">
+        <a href="#trabajos" class="glass-card p-5 rounded-2xl hover:border-merc-petronas/60 transition group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-merc-petronas">Sección 01</span>
+            <span id="countTrabajos" class="text-xs font-extrabold px-2 py-0.5 rounded-md bg-merc-petronas/15 text-merc-petronas">0</span>
+          </div>
+          <h2 class="font-bold text-slate-900 dark:text-white mb-1 group-hover:text-merc-petronas transition">Trabajos Prácticos</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Guías interactivas, exposiciones y entregas académicas.</p>
+        </a>
+
+        <a href="#tareas" class="glass-card p-5 rounded-2xl hover:border-merc-petronas/60 transition group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-merc-silver">Sección 02</span>
+            <span id="countTareas" class="text-xs font-extrabold px-2 py-0.5 rounded-md bg-slate-500/20 text-merc-silver">0</span>
+          </div>
+          <h2 class="font-bold text-slate-900 dark:text-white mb-1 group-hover:text-merc-petronas transition">Tareas & Entregas</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Checklist con fechas límite, prioridades y estado.</p>
+        </a>
+
+        <a href="#proyectos" class="glass-card p-5 rounded-2xl hover:border-merc-petronas/60 transition group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Sección 03</span>
+            <span id="countProyectos" class="text-xs font-extrabold px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-300">0</span>
+          </div>
+          <h2 class="font-bold text-slate-900 dark:text-white mb-1 group-hover:text-merc-petronas transition">Proyectos & Dev</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Desarrollo de videojuegos, scripts y experimentos web.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-20">
+
+    <!-- Barra de filtros rápidos y exportación -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1">Filtrar:</span>
+        <button type="button" data-filter="all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-merc-petronas text-merc-950 transition">Todos</button>
+        <button type="button" data-filter="pendiente" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-merc-900 text-merc-silver border border-merc-800 hover:border-merc-petronas/50 transition">Pendientes</button>
+        <button type="button" data-filter="completado" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-merc-900 text-merc-silver border border-merc-800 hover:border-merc-petronas/50 transition">Completados</button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="exportHtmlBtn" type="button" title="Descarga este archivo HTML con todos los cambios que agregaste con Gemini para subirlo a GitHub" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-merc-petronas/40 text-merc-petronas hover:bg-merc-petronas/10 transition flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Exportar HTML para GitHub
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: TRABAJOS PRÁCTICOS -->
+    <section id="trabajos" class="scroll-mt-24 space-y-6">
+      <div class="border-l-4 border-merc-petronas pl-4 sm:pl-6 flex items-end justify-between">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-merc-petronas">Módulo 01 • Académico</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+            Trabajos Prácticos y Guías
+          </h2>
+        </div>
+      </div>
+
+      <div id="grid-trabajos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Tarjetas inyectadas por JS -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: TAREAS PENDIENTES -->
+    <section id="tareas" class="scroll-mt-24 space-y-6">
+      <div class="border-l-4 border-merc-silver pl-4 sm:pl-6">
+        <span class="text-xs font-bold uppercase tracking-widest text-merc-silver">Módulo 02 • Seguimiento Diario</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          Tareas y Actividades
+        </h2>
+      </div>
+
+      <div id="grid-tareas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Tarjetas inyectadas por JS -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: PROYECTOS PERSONALES -->
+    <section id="proyectos" class="scroll-mt-24 space-y-6">
+      <div class="border-l-4 border-teal-400 pl-4 sm:pl-6">
+        <span class="text-xs font-bold uppercase tracking-widest text-teal-400">Módulo 03 • Desarrollo & Lab</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          Proyectos Personales
+        </h2>
+      </div>
+
+      <div id="grid-proyectos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Tarjetas inyectadas por JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pie de página -->
+  <footer class="border-t border-slate-200 dark:border-merc-800 py-8 px-4 text-center text-xs text-slate-500 dark:text-merc-silver/60">
+    <p>Nacricks Workspace • Edición Silver Arrows & Petronas • Conectado con Google Gemini API.</p>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL LATERAL (DRAWER) DE GEMINI EN VIVO                              -->
+  <!-- ===================================================================== -->
+  <div id="geminiDrawerBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden transition-opacity"></div>
+
+  <aside id="geminiDrawer" class="fixed top-0 right-0 h-full w-full sm:w-[440px] bg-white dark:bg-merc-900 border-l border-slate-200 dark:border-merc-800 z-50 transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+    <!-- Cabecera Drawer -->
+    <div class="p-5 border-b border-slate-200 dark:border-merc-800 flex items-center justify-between bg-slate-50 dark:bg-merc-950">
+      <div class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-lg bg-merc-petronas/20 text-merc-petronas flex items-center justify-center">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C12.3 7.4 16.6 11.7 22 12C16.6 12.3 12.3 16.6 12 22C11.7 16.6 7.4 12.3 2 12C7.4 11.7 11.7 7.4 12 2Z"/>
+          </svg>
+        </span>
+        <div>
+          <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Gemini Live Builder</h3>
+          <p class="text-[11px] text-merc-petronas font-medium">Agrega trabajos, tareas o bloques en vivo</p>
+        </div>
+      </div>
+      <button id="closeGeminiBtn" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-merc-800 transition">
+        ✕
+      </button>
+    </div>
+
+    <!-- Configuración de API Key -->
+    <div class="p-4 bg-slate-100/70 dark:bg-merc-850/90 border-b border-slate-200 dark:border-merc-800 space-y-2.5">
+      <div class="flex items-center justify-between">
+        <label for="geminiApiKey" class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-merc-silver">
+          Google Gemini API Key
+        </label>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-[11px] text-merc-petronas hover:underline font-semibold">
+          Obtener clave gratis →
+        </a>
+      </div>
+      <div class="flex gap-2">
+        <input id="geminiApiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-merc-950 border border-slate-300 dark:border-merc-800 text-slate-900 dark:text-white focus:outline-none focus:border-merc-petronas" />
+        <button id="saveApiKeyBtn" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-merc-petronas text-merc-950 hover:bg-teal-300 transition shrink-0">
+          Guardar
+        </button>
+      </div>
+      <p id="apiKeyMsg" class="text-[11px] text-slate-400">
+        Tu clave se guarda solo localmente en tu navegador (localStorage).
+      </p>
+    </div>
+
+    <!-- Historial de acciones con Gemini -->
+    <div id="geminiChatLog" class="flex-1 overflow-y-auto p-4 space-y-3 text-xs sm:text-sm">
+      <div class="p-3.5 rounded-2xl bg-merc-petronas/10 border border-merc-petronas/25 text-slate-700 dark:text-slate-200 space-y-1.5">
+        <p class="font-bold text-merc-petronas">¿Qué quieres agregar a tu web?</p>
+        <p class="text-xs leading-relaxed">
+          Conecta tu API Key arriba y pídemelo en lenguaje natural. Ejemplos:
+        </p>
+        <ul class="text-xs text-slate-400 space-y-1 list-disc pl-4">
+          <li>"Agregá un trabajo práctico de Literatura sobre Dr. Jekyll y Mr. Hyde para el 25 de noviembre."</li>
+          <li>"Añadí una tarea urgente de Matemática: resolver guía de funciones."</li>
+          <li>"Crea un proyecto nuevo de Godot 4 para físicas de autos."</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Formulario de envío en vivo -->
+    <form id="geminiPromptForm" class="p-4 border-t border-slate-200 dark:border-merc-800 bg-slate-50 dark:bg-merc-950 space-y-2.5">
+      <textarea id="geminiPromptInput" rows="2" placeholder="Escribe lo que quieres agregar o crear en vivo..." class="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-merc-900 border border-slate-300 dark:border-merc-800 text-slate-900 dark:text-white focus:outline-none focus:border-merc-petronas resize-none"></textarea>
+      <div class="flex items-center justify-between gap-2">
+        <span id="geminiLoadingIndicator" class="text-xs text-merc-petronas font-semibold hidden items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-merc-petronas animate-ping"></span>
+          Generando en vivo...
+        </span>
+        <button id="sendGeminiBtn" type="submit" class="ml-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-merc-petronas hover:bg-teal-300 text-merc-950 transition shadow-md cursor-pointer">
+          Agregar con Gemini ↑
+        </button>
+      </div>
+    </form>
+  </aside>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA JAVASCRIPT: ESTADO + GEMINI LIVE + EXPORTACIÓN                 -->
+  <!-- ===================================================================== -->
+  <script id="initial-data-script">
+    // Datos iniciales (se actualizan automáticamente si exportas el HTML)
+    window.INITIAL_ITEMS = [
+      {
+        id: 'item-1',
+        category: 'trabajos',
+        subject: 'Ciencias Naturales y Biología',
+        title: 'BioCosmos Lab — Guía Interactiva',
+        description: 'Guía de estudio interactiva sobre el origen del Universo, los 8 pasos de la Teoría Nebular, la Luna, células y evolución.',
+        date: 'Completado',
+        status: 'completado',
+        link: 'gu_a_interactiva_de_ciencias_naturales_y_biolog_a.html'
+      },
+      {
+        id: 'item-2',
+        category: 'trabajos',
+        subject: 'Biología',
+        title: 'Exposición Oral: Incubación en Aves y Huevos',
+        description: 'Presentación grupal dividida en 4 bloques sobre desarrollo embrionario e incubación.',
+        date: 'Entregado',
+        status: 'completado',
+        link: '#'
+      },
+      {
+        id: 'item-3',
+        category: 'tareas',
+        subject: 'Literatura',
+        title: 'Análisis de "El extraño caso del Dr. Jekyll y Mr. Hyde"',
+        description: 'Preparar resumen de capítulos clave y dualidad de los personajes para clase.',
+        date: 'Esta semana',
+        status: 'pendiente',
+        link: '#'
+      },
+      {
+        id: 'item-4',
+        category: 'proyectos',
+        subject: 'Godot Engine 4',
+        title: 'Simulador de Conducción 3D (VehicleBody3D)',
+        description: 'Configuración de físicas de ruedas, cajas de colisión y modelos .glb en Godot 4.',
+        date: 'En desarrollo',
+        status: 'pendiente',
+        link: '#'
+      }
+    ];
+  </script>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. TEMA CLARO / OSCURO
+    // -------------------------------------------------------------------------
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+
+    // -------------------------------------------------------------------------
+    // 2. GESTIÓN DE TARJETAS Y ALMACENAMIENTO LOCAL
+    // -------------------------------------------------------------------------
+    const STORAGE_KEY = 'nacricks_workspace_items_v1';
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY)) || window.INITIAL_ITEMS;
+    let currentFilter = 'all';
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      renderAllItems();
+    }
+
+    function toggleItemStatus(id) {
+      items = items.map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            status: item.status === 'completado' ? 'pendiente' : 'completado'
+          };
+        }
+        return item;
+      });
+      saveItems();
+    }
+
+    function deleteItem(id) {
+      items = items.filter(item => item.id !== id);
+      saveItems();
+    }
+
+    function renderAllItems() {
+      const categories = ['trabajos', 'tareas', 'proyectos'];
+
+      // Actualizar contadores
+      document.getElementById('countTrabajos').textContent = items.filter(i => i.category === 'trabajos').length;
+      document.getElementById('countTareas').textContent = items.filter(i => i.category === 'tareas').length;
+      document.getElementById('countProyectos').textContent = items.filter(i => i.category === 'proyectos').length;
+
+      categories.forEach(cat => {
+        const grid = document.getElementById(`grid-${cat}`);
+        const filtered = items.filter(item => {
+          const matchCat = item.category === cat;
+          const matchFilter = currentFilter === 'all' || item.status === currentFilter;
+          return matchCat && matchFilter;
+        });
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full glass-card rounded-2xl p-6 text-center text-xs text-slate-400 border-dashed">
+              No hay elementos en esta sección con el filtro actual. Usa <strong>Conectar Gemini</strong> para agregar uno en vivo.
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(item => {
+          const isDone = item.status === 'completado';
+          const badgeStyle = isDone
+            ? 'bg-merc-petronas/15 text-merc-petronas border-merc-petronas/30'
+            : 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+
+          const hasValidLink = item.link && item.link !== '#';
+
+          return `
+            <article class="glass-card rounded-2xl p-5 flex flex-col justify-between hover:border-merc-petronas/50 transition group relative">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-merc-silver">
+                    ${item.subject || 'General'}
+                  </span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeStyle}">
+                    ${isDone ? '✓ Completado' : '● Pendiente'}
+                  </span>
+                </div>
+
+                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white group-hover:text-merc-petronas transition leading-snug">
+                  ${item.title}
+                </h3>
+
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                  ${item.description}
+                </p>
+              </div>
+
+              <div class="mt-5 pt-3.5 border-t border-slate-200 dark:border-merc-800 flex items-center justify-between gap-2">
+                <span class="text-[11px] font-medium text-slate-400">
+                  📅 ${item.date || 'Sin fecha'}
+                </span>
+
+                <div class="flex items-center gap-1.5">
+                  ${hasValidLink ? `
+                    <a href="${item.link}" target="_blank" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-merc-petronas text-merc-950 hover:bg-teal-300 transition">
+                      Abrir →
+                    </a>
+                  ` : ''}
+
+                  <button type="button" onclick="toggleItemStatus('${item.id}')" title="Cambiar estado" class="p-1.5 rounded-lg border border-slate-200 dark:border-merc-800 text-slate-400 hover:text-merc-petronas hover:border-merc-petronas/50 transition text-xs">
+                    ${isDone ? '↺' : '✓'}
+                  </button>
+
+                  <button type="button" onclick="deleteItem('${item.id}')" title="Eliminar" class="p-1.5 rounded-lg border border-slate-200 dark:border-merc-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/50 transition text-xs">
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      });
+    }
+
+    // Filtros
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilter = btn.dataset.filter;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          if (b.dataset.filter === currentFilter) {
+            b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-merc-petronas text-merc-950 transition';
+          } else {
+            b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-merc-900 text-merc-silver border border-merc-800 hover:border-merc-petronas/50 transition';
+          }
+        });
+        renderAllItems();
+      });
+    });
+
+    renderAllItems();
+
+    // -------------------------------------------------------------------------
+    // 3. DRAWER Y CONEXIÓN EN VIVO CON GEMINI API
+    // -------------------------------------------------------------------------
+    const drawer = document.getElementById('geminiDrawer');
+    const backdrop = document.getElementById('geminiDrawerBackdrop');
+    const apiKeyInput = document.getElementById('geminiApiKey');
+    const statusDot = document.getElementById('geminiStatusDot');
+    const chatLog = document.getElementById('geminiChatLog');
+
+    function updateApiKeyIndicator() {
+      const key = localStorage.getItem('nacricks_gemini_api_key');
+      if (key) {
+        apiKeyInput.value = key;
+        statusDot.className = 'w-2 h-2 rounded-full bg-emerald-950 animate-ping';
+        document.getElementById('apiKeyMsg').textContent = '✓ API Key conectada y lista para usar.';
+        document.getElementById('apiKeyMsg').className = 'text-[11px] text-merc-petronas font-semibold';
+      }
+    }
+    updateApiKeyIndicator();
+
+    document.getElementById('openGeminiBtn').addEventListener('click', () => {
+      backdrop.classList.remove('hidden');
+      drawer.classList.remove('translate-x-full');
+    });
+
+    function closeDrawer() {
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+    document.getElementById('closeGeminiBtn').add
